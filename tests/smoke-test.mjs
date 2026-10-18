@@ -93,7 +93,7 @@ const persistenceStart = html.indexOf("function save()");
 const persistenceEnd = html.indexOf("function render", persistenceStart);
 assert.ok(persistenceStart >= 0 && persistenceEnd > persistenceStart, "Persistence functions must be present");
 const persistenceSource = html.slice(persistenceStart, persistenceEnd) +
-  "\\nglobalThis.progressTestApi = { save, loadProgress, clearProgress };";
+  "\nglobalThis.progressTestApi = { save, loadProgress, clearProgress };";
 const storageData = new Map();
 const storage = {
   setItem(key, value) { storageData.set(key, String(value)); },
