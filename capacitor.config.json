@@ -1,0 +1,6 @@
+{
+  "appId": "com.emotive.story",
+  "appName": "EMOTIVE",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
