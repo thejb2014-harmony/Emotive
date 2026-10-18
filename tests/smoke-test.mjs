@@ -43,20 +43,33 @@ for (const [sceneId, scene] of Object.entries(scenes)) {
   }
 }
 
-// Every scene must be reachable from start; every ending must be marked and reachable.
+// Validate the choice graph across all three independent tone-specific stories.
 const reachable = new Set();
 const pending = ["start"];
 while (pending.length) {
   const id = pending.pop();
   if (reachable.has(id)) continue;
   reachable.add(id);
-  for (const [, next] of scenes[id].choices) pending.push(next);
+  const scene = scenes[id];
+  const choiceSets = Array.isArray(scene.choices)
+    ? [scene.choices]
+    : validMoods.map((mood) => scene.choices[mood]).filter(Array.isArray);
+  for (const choices of choiceSets) {
+    for (const [, next] of choices) pending.push(next);
+  }
 }
-assert.equal(reachable.size, Object.keys(scenes).length, "Every scene should be reachable from start");
+assert.equal(reachable.size, Object.keys(scenes).length, "Every scene should be reachable through at least one tone");
+assert.ok(validMoods.every((mood) => Array.isArray(scenes.start.choices[mood])),
+  "The start scene must route into a distinct story for every tone");
+for (const mood of validMoods) {
+  const branch = Object.keys(scenes).filter((id) => id.startsWith(mood + "_"));
+  assert.ok(branch.length >= 5, `Tone ${mood} needs its own substantial story branch`);
+  assert.ok(branch.some((id) => scenes[id].end === true), `Tone ${mood} needs an ending`);
+}
 const endings = Object.entries(scenes).filter(([, scene]) => scene.end === true);
-assert.ok(endings.length >= 2, "At least two alternate endings must remain");
+assert.ok(endings.length >= 6, "Each tone should have alternate endings");
 for (const [id] of endings) {
   assert.ok(reachable.has(id), `Ending ${id} must be reachable`);
 }
 
-console.log(`EMOTIVE tests passed: ${Object.keys(scenes).length} scenes, ${endings.length} reachable endings, all choice targets valid.`);
+console.log(`EMOTIVE tests passed: ${Object.keys(scenes).length} scenes, ${endings.length} endings across three distinct tone-specific stories, all choice targets valid.`);
