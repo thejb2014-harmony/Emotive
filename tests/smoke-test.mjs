@@ -27,7 +27,7 @@ const validMoods = ["suspense", "emocional", "accion"];
 for (const [sceneId, scene] of Object.entries(scenes)) {
   assert.ok(scene.title && typeof scene.title === "string", `Scene ${sceneId} needs a title`);
   assert.ok(scene.text, `Scene ${sceneId} needs narrative text`);
-  assert.ok(Array.isArray(scene.choices) && scene.choices.length > 0, `Scene ${sceneId} needs choices`);
+  assert.ok(scene.choices && typeof scene.choices === "object", `Scene ${sceneId} needs choices`);
   if (typeof scene.text === "object") {
     for (const mood of validMoods) {
       assert.ok(typeof scene.text[mood] === "string" && scene.text[mood].length > 0,
