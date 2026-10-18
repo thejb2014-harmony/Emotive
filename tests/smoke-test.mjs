@@ -36,10 +36,16 @@ for (const [sceneId, scene] of Object.entries(scenes)) {
   } else {
     assert.equal(typeof scene.text, "string");
   }
-  for (const choice of scene.choices) {
-    assert.ok(Array.isArray(choice) && choice.length === 2, `Scene ${sceneId} has a malformed choice`);
-    assert.ok(typeof choice[0] === "string" && choice[0].length > 0, `Scene ${sceneId} has an empty choice label`);
-    assert.ok(Object.hasOwn(scenes, choice[1]), `Scene ${sceneId} points to missing scene "${choice[1]}"`);
+  const choiceSets = Array.isArray(scene.choices)
+    ? [scene.choices]
+    : validMoods.map((mood) => scene.choices[mood]).filter(Array.isArray);
+  assert.ok(choiceSets.length > 0, `Scene ${sceneId} needs at least one valid choice set`);
+  for (const choices of choiceSets) {
+    for (const choice of choices) {
+      assert.ok(Array.isArray(choice) && choice.length === 2, `Scene ${sceneId} has a malformed choice`);
+      assert.ok(typeof choice[0] === "string" && choice[0].length > 0, `Scene ${sceneId} has an empty choice label`);
+      assert.ok(Object.hasOwn(scenes, choice[1]), `Scene ${sceneId} points to missing scene "${choice[1]}"`);
+    }
   }
 }
 
