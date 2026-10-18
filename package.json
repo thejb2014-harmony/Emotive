@@ -4,7 +4,7 @@
   "private": true,
   "description": "EMOTIVE — prototipo narrativo interactivo",
   "scripts": {
-    "test": "node tests/smoke-test.mjs",
+    "test": "node tests/smoke-test.mjs && node tests/functional-test.mjs",
     "android:sync": "cap sync android"
   },
   "dependencies": {
@@ -12,6 +12,7 @@
     "@capacitor/core": "^7.4.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
+    "@capacitor/cli": "^7.4.3",
+    "jsdom": "^26.1.0"
   }
 }
