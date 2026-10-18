@@ -86,4 +86,40 @@ assert.match(html, /if\(nextMood!==state\.mood\)/, "Selecting the current tone s
 assert.match(html, /state\.scene="start";\s*state\.history=\[\]/, "Changing to an incompatible tone should return to selection and clear the old branch history");
 assert.match(html, /Tono cambiado\. Has vuelto al inicio/, "The app should explain that changing tone returns to the start");
 
+
+  
+// Functional persistence tests execute the actual save/load/clear functions from index.html.
+const persistenceStart = html.indexOf("function save()");
+const persistenceEnd = html.indexOf("function render", persistenceStart);
+assert.ok(persistenceStart >= 0 && persistenceEnd > persistenceStart, "Persistence functions must be present");
+const persistenceSource = html.slice(persistenceStart, persistenceEnd) +
+  "\\nglobalThis.progressTestApi = { save, loadProgress, clearProgress };";
+const storageData = new Map();
+const storage = {
+  setItem(key, value) { storageData.set(key, String(value)); },
+  getItem(key) { return storageData.has(key) ? storageData.get(key) : null; },
+  removeItem(key) { storageData.delete(key); }
+};
+const progressContext = { localStorage: storage, scenes, state: { mood: "emocional", scene: "emocional_letter", history: ["emocional_voice"] }, Object };
+vm.runInNewContext(persistenceSource, progressContext);
+const progressApi = progressContext.progressTestApi;
+assert.equal(progressApi.save(), true, "Saving valid progress should succeed");
+const storedProgress = JSON.parse(storage.getItem("emotive-state-v3"));
+assert.equal(storedProgress.scene, "emocional_letter", "The current scene must be persisted");
+assert.deepEqual(Array.from(storedProgress.history), ["emocional_voice"], "The decision history must be persisted");
+const restoredProgress = progressApi.loadProgress();
+assert.equal(restoredProgress.scene, "emocional_letter", "Reload must restore the current scene");
+assert.equal(restoredProgress.mood, "emocional", "Reload must restore the selected tone");
+assert.deepEqual(Array.from(restoredProgress.history), ["emocional_voice"], "Reload must restore decision history");
+storage.setItem("emotive-state-v3", "{broken json");
+assert.equal(progressApi.loadProgress(), null, "Corrupt stored JSON must be rejected safely");
+storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "not-a-scene", history: [] }));
+assert.equal(progressApi.loadProgress(), null, "Unknown scene IDs must be rejected");
+storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "emocional_letter", history: ["not-a-scene"] }));
+assert.equal(progressApi.loadProgress(), null, "Unknown history entries must be rejected");
+assert.equal(progressApi.clearProgress(), true, "Clearing saved progress should succeed");
+assert.equal(storage.getItem("emotive-state-v3"), null, "Clearing progress must remove the saved key");
+assert.equal(progressApi.loadProgress(), null, "Cleared progress must not be restored");
+assert.match(html, /render\(false\)/, "The clear action must render without immediately re-saving the reset state");
+
 console.log(`EMOTIVE tests passed: ${Object.keys(scenes).length} scenes, ${endings.length} endings across three distinct tone-specific stories, all choice targets valid.`);
