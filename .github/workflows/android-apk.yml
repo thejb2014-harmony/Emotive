@@ -9,6 +9,7 @@ on:
       - 'capacitor.config.json'
       - 'manifest.webmanifest'
       - 'sw.js'
+      - 'tests/**'
       - '.github/workflows/android-apk.yml'
 jobs:
   build:
