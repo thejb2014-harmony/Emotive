@@ -48,7 +48,21 @@ accion_end2:{title:"Final: A cualquier precio",text:"Sobrecargas el núcleo y de
 const $=id=>document.getElementById(id);let state={mood:"suspense",scene:"start",history:[]};let installPrompt=null;
 function save(){try{localStorage.setItem("emotive-state-v3",JSON.stringify(state))}catch{}}
 function render(){const s=scenes[state.scene]||scenes.start;const sceneChoices=Array.isArray(s.choices)?s.choices:(s.choices[state.mood]||s.choices.suspense);$("sceneTitle").textContent=s.title;$("sceneText").textContent=typeof s.text==="string"?s.text:s.text[state.mood];$("chapter").textContent="CAPÍTULO "+String(Math.min(state.history.length+1,4)).padStart(2,"0")+" / 04";$("status").textContent=s.end?"Episodio completado":"Historia en curso";$("choices").replaceChildren();sceneChoices.forEach(([label,next])=>{const b=document.createElement("button");b.className="choice";const t=document.createElement("span");t.textContent=label;const arrow=document.createElement("span");arrow.setAttribute("aria-hidden","true");arrow.textContent="↗";b.append(t,arrow);b.addEventListener("click",()=>{state.history.push(state.scene);state.scene=next;$("toast").textContent="Decisión guardada en este dispositivo.";save();render()});$("choices").append(b)});document.querySelectorAll("[data-mood]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mood===state.mood)));save()}
-document.querySelectorAll("[data-mood]").forEach(b=>b.addEventListener("click",()=>{state.mood=b.dataset.mood;$("toast").textContent="Tono narrativo actualizado.";render()}));
+function firstSceneForMood(mood){return mood==="suspense"?"suspense_signal":mood==="emocional"?"emocional_voice":"accion_run"}
+document.querySelectorAll("[data-mood]").forEach(b=>b.addEventListener("click",()=>{
+  const nextMood=b.dataset.mood;
+  if(nextMood!==state.mood){
+    state.mood=nextMood;
+    if(state.scene!=="start"&&!state.scene.startsWith(nextMood+"_")){
+      state.scene="start";
+      state.history=[];
+      $("toast").textContent="Tono cambiado. Has vuelto al inicio para comenzar la historia correspondiente.";
+    }else{
+      $("toast").textContent="Tono narrativo actualizado.";
+    }
+    render();
+  }
+}));
 $("startBtn").addEventListener("click",()=>{$("storySection").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});$("choices").querySelector("button")?.focus()});
 $("resetBtn").addEventListener("click",()=>{state.scene="start";state.history=[];$("toast").textContent="Episodio reiniciado.";render()});
 $("clearBtn").addEventListener("click",()=>{try{localStorage.removeItem("emotive-state-v3")}catch{}state={mood:"suspense",scene:"start",history:[]};$("toast").textContent="Progreso local borrado.";render()});
