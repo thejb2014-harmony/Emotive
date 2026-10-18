@@ -78,4 +78,13 @@ for (const [id] of endings) {
   assert.ok(reachable.has(id), `Ending ${id} must be reachable`);
 }
 
+
+// Check that switching tones during an incompatible branch resets to the chooser,
+// instead of rendering a scene from a different story.
+const moodHandler = html.match(/function firstSceneForMood\(mood\)[\s\S]*?\n\}\);/);
+assert.ok(moodHandler, "Tone switching must explicitly handle incompatible story branches");
+assert.match(moodHandler[0], /state\.scene="start"/, "Changing to an incompatible tone should return to story selection");
+assert.match(moodHandler[0], /state\.history=\[\]/, "Changing to an incompatible tone should clear the previous branch history");
+assert.match(moodHandler[0], /nextMood!==state\.mood/, "Selecting the current tone should not trigger a branch reset");
+
 console.log(`EMOTIVE tests passed: ${Object.keys(scenes).length} scenes, ${endings.length} endings across three distinct tone-specific stories, all choice targets valid.`);
