@@ -117,6 +117,10 @@ storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "
 assert.equal(progressApi.loadProgress(), null, "Unknown scene IDs must be rejected");
 storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "emocional_letter", history: ["not-a-scene"] }));
 assert.equal(progressApi.loadProgress(), null, "Unknown history entries must be rejected");
+storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "suspense_core", history: ["suspense_signal"] }));
+assert.equal(progressApi.loadProgress(), null, "Progress from a different story branch must be rejected");
+storage.setItem("emotive-state-v3", JSON.stringify({ mood: "emocional", scene: "emocional_letter", history: ["suspense_signal"] }));
+assert.equal(progressApi.loadProgress(), null, "History from a different story branch must be rejected");
 assert.equal(progressApi.clearProgress(), true, "Clearing saved progress should succeed");
 assert.equal(storage.getItem("emotive-state-v3"), null, "Clearing progress must remove the saved key");
 assert.equal(progressApi.loadProgress(), null, "Cleared progress must not be restored");
