@@ -1,0 +1,19 @@
+{
+  "name": "EMOTIVE — Historias vivas",
+  "short_name": "EMOTIVE",
+  "description": "Una historia que cambia con tus decisiones.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080912",
+  "theme_color": "#0b0c18",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
