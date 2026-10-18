@@ -1,0 +1,13 @@
+import { readFileSync, existsSync } from "node:fs";
+import assert from "node:assert/strict";
+const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const manifest = JSON.parse(readFileSync(new URL("../manifest.webmanifest", import.meta.url), "utf8"));
+const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+assert.match(html, /EMOTIVE/);
+assert.match(html, /localStorage/);
+assert.match(html, /aria-live/);
+assert.equal(manifest.display, "standalone");
+assert.ok(manifest.icons.length > 0);
+assert.ok(pkg.dependencies["@capacitor/core"]);
+assert.ok(existsSync(new URL("../sw.js", import.meta.url)));
+console.log("EMOTIVE smoke tests passed");
